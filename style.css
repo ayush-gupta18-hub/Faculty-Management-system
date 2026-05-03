@@ -45,26 +45,47 @@ body {
 }
 
 .brand {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1.25rem 1.25rem;
     text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 100%);
 }
 
-.brand i {
-    font-size: 2.5rem;
-    color: var(--accent);
-    margin-bottom: 0.5rem;
+.brand-logo-wrapper {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 10px 14px 8px;
+    display: inline-block;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 1px 4px rgba(0,0,0,0.15);
+    margin-bottom: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.brand h2 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: 1px;
+.brand-logo-wrapper:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.2);
 }
 
-.brand p {
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.7);
+.brand-logo {
+    width: 148px;
+    height: auto;
+    display: block;
+}
+
+.brand-divider {
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #D4600A, transparent);
+    margin: 12px auto 10px;
+    border-radius: 2px;
+}
+
+.brand-module {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
 }
 
 nav {
