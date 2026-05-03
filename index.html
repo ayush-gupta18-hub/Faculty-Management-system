@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LNMIIT Faculty Management Module</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <h2>LNMIIT CRS</h2>
+                <p>Faculty Management</p>
+            </div>
+            <nav>
+                <button class="nav-btn active" data-target="all-faculty">
+                    <i class="fa-solid fa-users"></i> All Faculty
+                </button>
+                <button class="nav-btn" data-target="add-faculty">
+                    <i class="fa-solid fa-user-plus"></i> Add Faculty
+                </button>
+                <button class="nav-btn" data-target="allocate-course">
+                    <i class="fa-solid fa-book"></i> Allocate Course
+                </button>
+                <button class="nav-btn" data-target="retrieve-details">
+                    <i class="fa-solid fa-id-card"></i> Retrieve Details
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Toast Container -->
+            <div id="toast-container" class="toast-container"></div>
+
+            <!-- Panel 1: All Faculty -->
+            <section id="all-faculty" class="panel active">
+                <header class="panel-header">
+                    <div class="header-title">
+                        <h1>All Faculty</h1>
+                        <p>Manage and overview all registered faculty members.</p>
+                    </div>
+                    <div class="search-bar">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="search-faculty" placeholder="Search by name or department...">
+                    </div>
+                </header>
+
+                <div class="stats-bar">
+                    <div class="stat-card">
+                        <i class="fa-solid fa-users"></i>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-total-faculty">0</span>
+                            <span class="stat-label">Total Faculty</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-building"></i>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-total-departments">0</span>
+                            <span class="stat-label">Departments</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-book-open"></i>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-total-courses">0</span>
+                            <span class="stat-label">Courses Assigned</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faculty-grid" id="faculty-grid">
+                    <!-- Cards will be populated here by JS -->
+                </div>
+            </section>
+
+            <!-- Panel 2: Add Faculty -->
+            <section id="add-faculty" class="panel">
+                <header class="panel-header">
+                    <div class="header-title">
+                        <h1>Add New Faculty</h1>
+                        <p>Enter the details to register a new faculty member.</p>
+                    </div>
+                </header>
+                <div class="form-card">
+                    <form id="add-faculty-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="firstName">First Name *</label>
+                                <input type="text" id="firstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name *</label>
+                                <input type="text" id="lastName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="empId">Employee ID (Auto)</label>
+                                <input type="text" id="empId" readonly style="background-color: #f3f4f6; color: var(--text-muted); cursor: not-allowed;">
+                            </div>
+                            <div class="form-group">
+                                <label for="department">Department *</label>
+                                <select id="department" required>
+                                    <option value="" disabled selected>Select Department</option>
+                                    <option value="CSE">Computer Science & Engineering</option>
+                                    <option value="ECE">Electronics & Communication</option>
+                                    <option value="ME">Mechanical Engineering</option>
+                                    <option value="Mathematics">Mathematics</option>
+                                    <option value="Physics">Physics</option>
+                                    <option value="HSS">Humanities & Social Sciences</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="designation">Designation *</label>
+                                <select id="designation" required>
+                                    <option value="" disabled selected>Select Designation</option>
+                                    <option value="Professor">Professor</option>
+                                    <option value="Associate Professor">Associate Professor</option>
+                                    <option value="Assistant Professor">Assistant Professor</option>
+                                    <option value="Lecturer">Lecturer</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="joiningYear">Joining Year *</label>
+                                <input type="number" id="joiningYear" min="1990" max="2030" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address *</label>
+                                <input type="email" id="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="specialization">Specialization</label>
+                                <input type="text" id="specialization" placeholder="e.g. Artificial Intelligence, Data Science">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="reset" class="btn-secondary">Clear</button>
+                            <button type="submit" class="btn-primary">Add Faculty</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Panel 3: Allocate Course -->
+            <section id="allocate-course" class="panel">
+                <header class="panel-header">
+                    <div class="header-title">
+                        <h1>Allocate Course</h1>
+                        <p>Assign courses to existing faculty members.</p>
+                    </div>
+                </header>
+                <div class="form-card">
+                    <form id="allocate-course-form">
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label for="allocFacultySelect">Select Faculty *</label>
+                                <select id="allocFacultySelect" required>
+                                    <option value="" disabled selected>Select Faculty</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="courseCode">Course Code *</label>
+                                <input type="text" id="courseCode" placeholder="e.g. CSE301" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="courseName">Course Name *</label>
+                                <input type="text" id="courseName" placeholder="e.g. Database Systems" required>
+                            </div>
+                        </div>
+                        <div class="form-actions right">
+                            <button type="submit" class="btn-primary">Allocate Course</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <h3 class="section-subtitle">Current Allocations</h3>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Faculty</th>
+                                <th>Department</th>
+                                <th>Course Code</th>
+                                <th>Course Name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allocations-tbody">
+                            <!-- Rows populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Panel 4: Retrieve Details -->
+            <section id="retrieve-details" class="panel">
+                <header class="panel-header">
+                    <div class="header-title">
+                        <h1>Faculty Details</h1>
+                        <p>View complete profile and course allocations.</p>
+                    </div>
+                    <div class="form-group inline-select">
+                        <select id="retrieveFacultySelect">
+                            <option value="" disabled selected>Search/Select Faculty to view details</option>
+                        </select>
+                    </div>
+                </header>
+
+                <div id="faculty-profile-view" class="profile-view hidden">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <div class="profile-avatar large" id="prof-avatar">AB</div>
+                            <div class="profile-title">
+                                <h2 id="prof-name">Name</h2>
+                                <p id="prof-designation-dept">Designation | Department</p>
+                            </div>
+                        </div>
+                        <div class="profile-body">
+                            <div class="info-group">
+                                <h3>Personal Information</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <span class="label">Employee ID</span>
+                                        <span class="value" id="prof-empid">EMP001</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="label">Joining Year</span>
+                                        <span class="value" id="prof-year">2020</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="label">Email</span>
+                                        <span class="value" id="prof-email">email@lnmiit.ac.in</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="label">Phone</span>
+                                        <span class="value" id="prof-phone">+91 0000000000</span>
+                                    </div>
+                                    <div class="info-item full">
+                                        <span class="label">Specialization</span>
+                                        <span class="value" id="prof-spec">Specialization</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="info-group">
+                                <h3>Allocated Courses</h3>
+                                <div class="courses-chip-container large" id="prof-courses">
+                                    <!-- Course chips -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="no-profile-selected" class="empty-state">
+                    <i class="fa-solid fa-id-badge"></i>
+                    <p>Select a faculty member from the dropdown above to view their details.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> Confirm Deletion</h3>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to remove <strong id="delete-target-name"></strong>?</p>
+                <p class="warning-text">This action will also remove all their course allocations. This cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancel-delete">Cancel</button>
+                <button class="btn-danger" id="confirm-delete">Yes, Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
