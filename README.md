@@ -1,10 +1,10 @@
-# 🎓 LNMIIT Faculty Management System
+#  LNMIIT Faculty Management System
 
 A full-stack web application for managing faculty members, departments, and course allocations at **The LNM Institute of Information Technology (LNMIIT)**. Built with vanilla HTML/CSS/JS on the frontend and Node.js + Express + MongoDB on the backend.
 
 ---
 
-## 📸 Features
+##  Features
 
 - **All Faculty** — View all registered faculty in a card grid with search by name or department
 - **Add Faculty** — Register new faculty with auto-generated Employee IDs and full validation
@@ -15,7 +15,7 @@ A full-stack web application for managing faculty members, departments, and cour
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -28,7 +28,7 @@ A full-stack web application for managing faculty members, departments, and cour
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 Faculty-Management/
@@ -72,10 +72,8 @@ cd Faculty-Management
 Open `server/.env` and set your MongoDB connection string:
 
 ```env
-# MongoDB Atlas (Cloud)
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/faculty_management?retryWrites=true&w=majority
 
-# OR Local MongoDB
+# Local MongoDB
 MONGO_URI=mongodb://localhost:27017/faculty_management
 
 PORT=5000
@@ -107,10 +105,8 @@ You should see:
 
 ```
 ✅  Connected to MongoDB
-🌱  Seeded 4 initial faculty records   ← (only on first run)
-
 🚀  Server running at http://localhost:5000
-📚  API base:        http://localhost:5000/api/faculty
+  API base:        http://localhost:5000/api/faculty
 ```
 
 ---
@@ -123,7 +119,7 @@ Visit **[http://localhost:5000](http://localhost:5000)** in your browser.
 
 ---
 
-## 🔌 REST API Reference
+##  REST API Reference
 
 All endpoints are prefixed with `/api/faculty`.
 
@@ -168,7 +164,7 @@ Content-Type: application/json
 
 ---
 
-## 🗄️ Data Model
+##  Data Model
 
 ```js
 Faculty {
@@ -193,20 +189,7 @@ Faculty {
 
 ---
 
-## 🌱 Seed Data
-
-On the **first run**, if the database is empty, the server automatically seeds 4 faculty members:
-
-| Name | Emp ID | Department | Designation |
-|---|---|---|---|
-| Amit Sharma | EMP001 | CSE | Professor |
-| Priya Singh | EMP002 | ECE | Associate Professor |
-| Rahul Verma | EMP003 | ME | Assistant Professor |
-| Neha Gupta | EMP004 | Mathematics | Professor |
-
----
-
-## ✅ Validation Rules
+##  Validation Rules
 
 | Field | Rule |
 |---|---|
@@ -218,7 +201,7 @@ On the **first run**, if the database is empty, the server automatically seeds 4
 
 ---
 
-## 👨‍💻 Development
+##  Development
 
 To run with **auto-restart** on file changes, use `nodemon`:
 
@@ -229,10 +212,10 @@ npm run dev
 
 ---
 
-## 📄 License
+##  License
 
 This project is built for academic purposes at LNMIIT.
 
 ---
 
-*Built with ❤️ for LNMIIT — The LNM Institute of Information Technology*
+*Built for LNMIIT — The LNM Institute of Information Technology*
