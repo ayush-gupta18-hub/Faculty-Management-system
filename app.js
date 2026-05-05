@@ -12,13 +12,25 @@ let facultyToDelete = null;
 
 // ── API Helper ────────────────────────────────────────────────────────
 async function apiFetch(path, options = {}) {
-    const res  = await fetch(API + path, {
-        headers: { 'Content-Type': 'application/json' },
+    const token = localStorage.getItem('token');
+
+    const res = await fetch(API + path, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
         ...options
     });
+    
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Request failed');
     return data;
+}
+
+const token = localStorage.getItem("token");
+
+if (!token) {
+    window.location.href = "auth.html";
 }
 
 // ── Load all faculty from the server ─────────────────────────────────
@@ -332,7 +344,6 @@ document.getElementById('confirm-delete').addEventListener('click', async () => 
     }
 });
 
-// ── Toast Notifications ───────────────────────────────────────────────
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
     const toast     = document.createElement('div');
@@ -345,4 +356,11 @@ function showToast(message, type = 'success') {
     toast.innerHTML = `${icon}<span>${message}</span>`;
     container.appendChild(toast);
     setTimeout(() => { if (toast.parentElement) toast.remove(); }, 3000);
+}
+
+// ── Logout Button ────────────────────────────────────────────
+
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "auth.html";
 }

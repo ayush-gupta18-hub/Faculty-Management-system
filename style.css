@@ -413,7 +413,7 @@ nav {
 
 .form-grid-3 {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
 }
 
@@ -519,6 +519,15 @@ nav {
 
 .hidden {
     display: none !important;
+}
+
+.logout-btn {
+  margin-top: auto;
+  color: #ef4444;
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .profile-card {
@@ -676,6 +685,69 @@ nav {
     gap: 1rem;
     background: #f9fafb;
     border-radius: 0 0 8px 8px;
+}
+
+.auth-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f9fafb;
+}
+
+.auth-card {
+    width: 380px;
+    padding: 2rem;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 1rem;
+}
+.auth-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f9fafb;
+}
+
+.auth-card {
+    width: 380px;
+    padding: 2rem;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.auth-switch span {
+    color: #2563eb;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.hidden {
+    display: none;
+}
+
+.auth-switch span {
+    color: #2563eb;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.hidden {
+    display: none;
 }
 
 /* Toasts */
