@@ -3,7 +3,30 @@ const express  = require('express');
 const mongoose = require('mongoose');
 const cors     = require('cors');
 const path     = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const Faculty  = require('./models/Faculty');
+const User = require('./models/User');
+
+// ── Auth Middleware ────────────────────────────────────────────────────────────────
+
+function authMiddleware(req, res, next) {
+  const header = req.headers.authorization;
+
+  if (!header) return res.status(401).json({ error: 'No token' });
+
+  const token = header.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
+
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
@@ -70,10 +93,46 @@ async function seedIfEmpty() {
     console.log('🌱  Seeded 4 initial faculty records');
 }
 
+
+// ── Auth API ────────────────────────────────────────────────────────────────
+
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    const user = new User({ email, password: hashed });
+    await user.save();
+
+    res.json({ message: 'User registered' });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) return res.status(400).json({ error: 'Invalid email' });
+
+  const valid = await bcrypt.compare(password, user.password);
+  if (!valid) return res.status(400).json({ error: 'Invalid password' });
+
+  const token = jwt.sign(
+    { userId: user._id },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+
+  res.json({ token });
+});
+
 // ── API Routes ────────────────────────────────────────────────────────────────
 
 // GET  /api/faculty          — list all faculty
-app.get('/api/faculty', async (_req, res) => {
+app.get('/api/faculty', authMiddleware, async (_req, res) => {
     try {
         const faculty = await Faculty.find().sort({ createdAt: 1 });
         res.json(faculty);
@@ -83,7 +142,7 @@ app.get('/api/faculty', async (_req, res) => {
 });
 
 // POST /api/faculty          — add new faculty
-app.post('/api/faculty', async (req, res) => {
+app.post('/api/faculty', authMiddleware, async (req, res) => {
     try {
         const faculty = new Faculty(req.body);
         await faculty.save();
@@ -101,7 +160,7 @@ app.post('/api/faculty', async (req, res) => {
 });
 
 // DELETE /api/faculty/:id    — remove a faculty member
-app.delete('/api/faculty/:id', async (req, res) => {
+app.delete('/api/faculty/:id', authMiddleware, async (req, res) => {
     try {
         const deleted = await Faculty.findByIdAndDelete(req.params.id);
         if (!deleted) return res.status(404).json({ error: 'Faculty not found.' });
@@ -112,7 +171,7 @@ app.delete('/api/faculty/:id', async (req, res) => {
 });
 
 // POST /api/faculty/:id/courses          — allocate a course
-app.post('/api/faculty/:id/courses', async (req, res) => {
+app.post('/api/faculty/:id/courses', authMiddleware, async (req, res) => {
     try {
         const faculty = await Faculty.findById(req.params.id);
         if (!faculty) return res.status(404).json({ error: 'Faculty not found.' });
@@ -131,7 +190,7 @@ app.post('/api/faculty/:id/courses', async (req, res) => {
 });
 
 // DELETE /api/faculty/:id/courses/:code  — remove a course allocation
-app.delete('/api/faculty/:id/courses/:code', async (req, res) => {
+app.delete('/api/faculty/:id/courses/:code', authMiddleware, async (req, res) => {
     try {
         const faculty = await Faculty.findById(req.params.id);
         if (!faculty) return res.status(404).json({ error: 'Faculty not found.' });

@@ -86,7 +86,17 @@ PORT=5000
 
 ---
 
-### 3. Install Dependencies
+### 3. Add JWT_SECRET
+
+# MongoDB
+MONGO_URI=mongodb://localhost:27017/faculty_management
+
+# Server
+PORT=5000
+
+# JWT Secret (REQUIRED for authentication)
+JWT_SECRET=your_super_secret_key_here
+### 4. Install Dependencies
 
 ```bash
 cd server
@@ -95,7 +105,7 @@ npm install
 
 ---
 
-### 4. Start the Server
+### 5. Start the Server
 
 ```bash
 node server.js
@@ -111,7 +121,7 @@ You should see:
 
 ---
 
-### 5. Open the App
+### 6. Open the App
 
 Visit **[http://localhost:5000](http://localhost:5000)** in your browser.
 

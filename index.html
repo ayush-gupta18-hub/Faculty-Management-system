@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,13 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="brand">
                 <div class="brand-logo-wrapper">
-                    <img src="lnmiit_logo.png" alt="LNMIIT - The LNM Institute of Information Technology" class="brand-logo">
+                    <img src="lnmiit_logo.png" alt="LNMIIT - The LNM Institute of Information Technology"
+                        class="brand-logo">
                 </div>
                 <div class="brand-divider"></div>
                 <p class="brand-module">Faculty Management System</p>
@@ -31,6 +34,10 @@
                 </button>
                 <button class="nav-btn" data-target="retrieve-details">
                     <i class="fa-solid fa-id-card"></i> Retrieve Details
+                </button>
+
+                <button class="nav-btn logout-btn" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
                 </button>
             </nav>
         </aside>
@@ -103,7 +110,8 @@
                             </div>
                             <div class="form-group">
                                 <label for="empId">Employee ID (Auto)</label>
-                                <input type="text" id="empId" readonly style="background-color: #f3f4f6; color: var(--text-muted); cursor: not-allowed;">
+                                <input type="text" id="empId" readonly
+                                    style="background-color: #f3f4f6; color: var(--text-muted); cursor: not-allowed;">
                             </div>
                             <div class="form-group">
                                 <label for="department">Department *</label>
@@ -141,7 +149,8 @@
                             </div>
                             <div class="form-group full-width">
                                 <label for="specialization">Specialization</label>
-                                <input type="text" id="specialization" placeholder="e.g. Artificial Intelligence, Data Science">
+                                <input type="text" id="specialization"
+                                    placeholder="e.g. Artificial Intelligence, Data Science">
                             </div>
                         </div>
                         <div class="form-actions">
@@ -183,7 +192,7 @@
                         </div>
                     </form>
                 </div>
-                
+
                 <h3 class="section-subtitle">Current Allocations</h3>
                 <div class="table-container">
                     <table class="data-table">
@@ -278,7 +287,8 @@
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to remove <strong id="delete-target-name"></strong>?</p>
-                <p class="warning-text">This action will also remove all their course allocations. This cannot be undone.</p>
+                <p class="warning-text">This action will also remove all their course allocations. This cannot be
+                    undone.</p>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" id="cancel-delete">Cancel</button>
@@ -289,4 +299,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>
