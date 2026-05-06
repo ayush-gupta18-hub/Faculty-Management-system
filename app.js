@@ -2,18 +2,25 @@
 // LNMIIT Faculty Management — Frontend (MongoDB-backed via REST API)
 // =====================================================================
 
-const API = '/api/faculty';
+const API    = '/api/faculty';
 const COLORS = ['#f87171','#fb923c','#fbbf24','#a3e635','#4ade80','#34d399',
                  '#2dd4bf','#38bdf8','#818cf8','#a78bfa','#e879f9','#f472b6'];
 
 // ── State ─────────────────────────────────────────────────────────────
-let facultyData    = [];
+let facultyData     = [];
 let facultyToDelete = null;
+
+// ── RBAC: read role & dept saved by auth.js ───────────────────────────
+const token    = localStorage.getItem('token');
+const userRole = localStorage.getItem('userRole');   // 'super_admin' | 'hod'
+const userDept = localStorage.getItem('userDept');   // e.g. 'CSE' or ''
+
+if (!token) {
+    window.location.href = 'auth.html';
+}
 
 // ── API Helper ────────────────────────────────────────────────────────
 async function apiFetch(path, options = {}) {
-    const token = localStorage.getItem('token');
-
     const res = await fetch(API + path, {
         headers: {
             'Content-Type': 'application/json',
@@ -21,19 +28,189 @@ async function apiFetch(path, options = {}) {
         },
         ...options
     });
-    
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Request failed');
     return data;
 }
 
-const token = localStorage.getItem("token");
+// ══════════════════════════════════════════════════════════════════════
+// REAL-TIME INLINE VALIDATION
+// ══════════════════════════════════════════════════════════════════════
 
-if (!token) {
-    window.location.href = "auth.html";
+const CURRENT_YEAR = new Date().getFullYear();
+
+/**
+ * Validation rules for each field.
+ * Returns an error string, or '' if valid.
+ */
+function validateField(id, value) {
+    switch (id) {
+        case 'firstName':
+        case 'lastName': {
+            const label = id === 'firstName' ? 'First name' : 'Last name';
+            if (!value.trim()) return `${label} is required.`;
+            if (!/^[A-Za-z\s'-]+$/.test(value.trim()))
+                return `${label} must contain only letters.`;
+            return '';
+        }
+        case 'department':
+            return value ? '' : 'Please select a department.';
+        case 'designation':
+            return value ? '' : 'Please select a designation.';
+        case 'joiningYear': {
+            const yr = parseInt(value, 10);
+            if (!value) return 'Joining year is required.';
+            if (isNaN(yr) || yr < 1990 || yr > CURRENT_YEAR)
+                return `Year must be between 1990 and ${CURRENT_YEAR}.`;
+            return '';
+        }
+        case 'email': {
+            if (!value.trim()) return 'Email is required.';
+            if (!/^[^\s@]+@lnmiit\.ac\.in$/.test(value.trim()))
+                return 'Must be a valid @lnmiit.ac.in address.';
+            return '';
+        }
+        case 'phone': {
+            if (!value) return '';   // optional field
+            if (!/^\d{10}$/.test(value)) return 'Phone must be exactly 10 digits.';
+            return '';
+        }
+        case 'specialization':
+            return value ? '' : 'Please select a specialization.';
+        default:
+            return '';
+    }
 }
 
-// ── Load all faculty from the server ─────────────────────────────────
+/** Show/hide the inline error message and set border colour */
+function setFieldState(id, errorMsg) {
+    const input  = document.getElementById(id);
+    const errEl  = document.getElementById(`err-${id}`);
+    if (!input) return;
+
+    if (errorMsg) {
+        input.classList.add('invalid');
+        input.classList.remove('valid');
+        if (errEl) errEl.textContent = `⚠ ${errorMsg}`;
+    } else if (input.value || input.tagName === 'SELECT') {
+        input.classList.remove('invalid');
+        input.classList.add('valid');
+        if (errEl) errEl.textContent = '';
+    } else {
+        input.classList.remove('invalid', 'valid');
+        if (errEl) errEl.textContent = '';
+    }
+}
+
+/** Re-evaluate all required fields and enable/disable the submit button */
+const REQUIRED_FIELDS = ['firstName','lastName','department','designation',
+                         'joiningYear','email','specialization'];
+
+function refreshSubmitState() {
+    const btn = document.getElementById('submit-add-faculty');
+    if (!btn) return;
+    const hasErrors = REQUIRED_FIELDS.some(id => {
+        const el = document.getElementById(id);
+        return !el || el.classList.contains('invalid') || (!el.value.trim());
+    });
+    btn.disabled = hasErrors;
+}
+
+/** Attach blur + input listeners to a field */
+function attachValidation(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    // Validate on blur (leaving the field)
+    el.addEventListener('blur', () => {
+        const err = validateField(id, el.value);
+        setFieldState(id, err);
+        refreshSubmitState();
+    });
+
+    // Validate on change (for selects) or on input (for text)
+    const event = el.tagName === 'SELECT' ? 'change' : 'input';
+    el.addEventListener(event, () => {
+        // Only show real-time errors once the field has been touched (has a value)
+        if (el.value) {
+            const err = validateField(id, el.value);
+            setFieldState(id, err);
+        } else {
+            el.classList.remove('invalid', 'valid');
+            const errEl = document.getElementById(`err-${id}`);
+            if (errEl) errEl.textContent = '';
+        }
+        refreshSubmitState();
+    });
+}
+
+/** Wire up all validated fields */
+function initValidation() {
+    [...REQUIRED_FIELDS, 'phone'].forEach(attachValidation);
+    refreshSubmitState();
+}
+
+/** Reset validation state when the form is cleared */
+function resetValidation() {
+    [...REQUIRED_FIELDS, 'phone'].forEach(id => {
+        const el   = document.getElementById(id);
+        const errEl = document.getElementById(`err-${id}`);
+        if (el)    el.classList.remove('valid', 'invalid');
+        if (errEl) errEl.textContent = '';
+    });
+    refreshSubmitState();
+}
+
+/** Shake the form to signal a blocked submission */
+function shakeForm() {
+    const form = document.getElementById('add-faculty-form');
+    form.classList.add('shake');
+    form.addEventListener('animationend', () => form.classList.remove('shake'), { once: true });
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// RBAC
+// ══════════════════════════════════════════════════════════════════════
+
+function applyRBACUI() {
+    const roleBadge = document.getElementById('role-badge');
+    const roleIcon  = document.getElementById('role-icon');
+    const roleLabel = document.getElementById('role-label');
+    const deptBadge = document.getElementById('dept-badge');
+
+    if (userRole === 'super_admin') {
+        roleBadge.classList.add('super-admin');
+        roleIcon.className    = 'fa-solid fa-crown';
+        roleLabel.textContent = 'Super Admin';
+        deptBadge.classList.add('hidden');
+    } else if (userRole === 'hod') {
+        roleBadge.classList.add('hod');
+        roleIcon.className    = 'fa-solid fa-building-user';
+        roleLabel.textContent = 'HOD';
+        if (userDept) {
+            deptBadge.textContent = userDept;
+            deptBadge.classList.remove('hidden');
+        }
+        // Show HOD notice banner
+        const notice = document.getElementById('hod-dept-notice');
+        if (notice) {
+            notice.classList.remove('hidden');
+            document.getElementById('hod-dept-label').textContent = userDept;
+        }
+        // Lock the Department select to HOD's dept
+        const deptSelect = document.getElementById('department');
+        if (deptSelect) {
+            deptSelect.innerHTML = `<option value="${userDept}" selected>${userDept}</option>`;
+            deptSelect.disabled  = true;
+            deptSelect.style.cssText = 'background:#f3f4f6;color:var(--text-muted);cursor:not-allowed;';
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// CORE APP
+// ══════════════════════════════════════════════════════════════════════
+
 async function loadFaculty() {
     try {
         facultyData = await apiFetch('');
@@ -43,7 +220,6 @@ async function loadFaculty() {
     }
 }
 
-// ── Auto-generate next Emp ID (for form pre-fill) ────────────────────
 function generateEmpId() {
     let maxId = 0;
     facultyData.forEach(f => {
@@ -79,6 +255,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    applyRBACUI();
+    initValidation();
     loadFaculty();
 });
 
@@ -108,7 +286,6 @@ function populateSelects() {
     const opts = facultyData
         .map(f => `<option value="${f.id}">${f.firstName} ${f.lastName} (${f.empId})</option>`)
         .join('');
-
     document.getElementById('allocFacultySelect').innerHTML =
         `<option value="" disabled selected>Select Faculty</option>${opts}`;
     document.getElementById('retrieveFacultySelect').innerHTML =
@@ -121,7 +298,7 @@ function getInitials(first, last) {
 }
 
 function renderAllFaculty(filterText = '') {
-    const grid     = document.getElementById('faculty-grid');
+    const grid = document.getElementById('faculty-grid');
     grid.innerHTML = '';
 
     const lower    = filterText.toLowerCase();
@@ -176,24 +353,24 @@ function viewFacultyDetails(id) {
     renderProfileView(id);
 }
 
-// ── Add Faculty Panel ─────────────────────────────────────────────────
+// ── Add Faculty Form Submit ────────────────────────────────────────────
 document.getElementById('add-faculty-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const email      = document.getElementById('email').value.trim();
-    const phone      = document.getElementById('phone').value.trim();
-    const joiningYear = parseInt(document.getElementById('joiningYear').value, 10);
+    // Run full validation on all fields before submitting
+    let hasErrors = false;
+    [...REQUIRED_FIELDS, 'phone'].forEach(id => {
+        const el  = document.getElementById(id);
+        if (!el) return;
+        const err = validateField(id, el.value);
+        setFieldState(id, err);
+        if (err) hasErrors = true;
+    });
 
-    // Client-side validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showToast('Invalid email format!', 'error'); return;
-    }
-    if (phone && !/^\d{10}$/.test(phone)) {
-        showToast('Phone number must be exactly 10 digits!', 'error'); return;
-    }
-    const currentYear = new Date().getFullYear();
-    if (isNaN(joiningYear) || joiningYear < 1990 || joiningYear > currentYear) {
-        showToast(`Joining year must be between 1990 and ${currentYear}!`, 'error'); return;
+    if (hasErrors) {
+        shakeForm();
+        showToast('Please fix the highlighted errors before submitting.', 'error');
+        return;
     }
 
     const payload = {
@@ -202,17 +379,19 @@ document.getElementById('add-faculty-form').addEventListener('submit', async (e)
         empId:          document.getElementById('empId').value.trim(),
         department:     document.getElementById('department').value,
         designation:    document.getElementById('designation').value,
-        joiningYear,
-        email,
-        phone,
-        specialization: document.getElementById('specialization').value.trim() || 'N/A',
-        color: COLORS[Math.floor(Math.random() * COLORS.length)]
+        joiningYear:    parseInt(document.getElementById('joiningYear').value, 10),
+        email:          document.getElementById('email').value.trim(),
+        phone:          document.getElementById('phone').value.trim(),
+        specialization: document.getElementById('specialization').value || 'N/A',
+        color:          COLORS[Math.floor(Math.random() * COLORS.length)]
     };
 
     try {
         const added = await apiFetch('', { method: 'POST', body: JSON.stringify(payload) });
         showToast(`✅ Added ${added.firstName} ${added.lastName}`, 'success');
         e.target.reset();
+        resetValidation();
+        applyRBACUI();   // re-lock HOD dept after reset
         await loadFaculty();
     } catch (err) {
         showToast(err.message, 'error');
@@ -276,7 +455,6 @@ window.removeCourse = async function (facultyId, courseCode) {
         await apiFetch(`/${facultyId}/courses/${courseCode}`, { method: 'DELETE' });
         showToast(`Removed course ${courseCode}.`, 'success');
         await loadFaculty();
-        // Refresh profile view if currently open
         const sel = document.getElementById('retrieveFacultySelect');
         if (sel.value === facultyId) renderProfileView(facultyId);
     } catch (err) {
@@ -297,16 +475,16 @@ function renderProfileView(id) {
     document.getElementById('faculty-profile-view').classList.remove('hidden');
 
     const avatar = document.getElementById('prof-avatar');
-    avatar.innerText           = getInitials(faculty.firstName, faculty.lastName);
+    avatar.innerText             = getInitials(faculty.firstName, faculty.lastName);
     avatar.style.backgroundColor = faculty.color;
 
-    document.getElementById('prof-name').innerText              = `${faculty.firstName} ${faculty.lastName}`;
-    document.getElementById('prof-designation-dept').innerText  = `${faculty.designation} | ${faculty.department}`;
-    document.getElementById('prof-empid').innerText             = faculty.empId;
-    document.getElementById('prof-year').innerText              = faculty.joiningYear;
-    document.getElementById('prof-email').innerText             = faculty.email;
-    document.getElementById('prof-phone').innerText             = faculty.phone || 'N/A';
-    document.getElementById('prof-spec').innerText              = faculty.specialization || 'N/A';
+    document.getElementById('prof-name').innerText             = `${faculty.firstName} ${faculty.lastName}`;
+    document.getElementById('prof-designation-dept').innerText = `${faculty.designation} | ${faculty.department}`;
+    document.getElementById('prof-empid').innerText            = faculty.empId;
+    document.getElementById('prof-year').innerText             = faculty.joiningYear;
+    document.getElementById('prof-email').innerText            = faculty.email;
+    document.getElementById('prof-phone').innerText            = faculty.phone || 'N/A';
+    document.getElementById('prof-spec').innerText             = faculty.specialization || 'N/A';
 
     const coursesContainer = document.getElementById('prof-courses');
     coursesContainer.innerHTML = faculty.courses.length > 0
@@ -358,9 +536,10 @@ function showToast(message, type = 'success') {
     setTimeout(() => { if (toast.parentElement) toast.remove(); }, 3000);
 }
 
-// ── Logout Button ────────────────────────────────────────────
-
+// ── Logout ────────────────────────────────────────────────────────────
 function logout() {
-    localStorage.removeItem("token");
-    window.location.href = "auth.html";
+    localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userDept');
+    window.location.href = 'auth.html';
 }

@@ -22,11 +22,21 @@
                 <div class="brand-divider"></div>
                 <p class="brand-module">Faculty Management System</p>
             </div>
+
+            <!-- Role info badge -->
+            <div class="role-info-panel" id="role-info-panel">
+                <div class="role-badge" id="role-badge">
+                    <i class="fa-solid fa-crown" id="role-icon"></i>
+                    <span id="role-label">Super Admin</span>
+                </div>
+                <span class="dept-badge hidden" id="dept-badge"></span>
+            </div>
+
             <nav>
                 <button class="nav-btn active" data-target="all-faculty">
                     <i class="fa-solid fa-users"></i> All Faculty
                 </button>
-                <button class="nav-btn" data-target="add-faculty">
+                <button class="nav-btn" data-target="add-faculty" id="nav-add-faculty">
                     <i class="fa-solid fa-user-plus"></i> Add Faculty
                 </button>
                 <button class="nav-btn" data-target="allocate-course">
@@ -56,7 +66,7 @@
                     </div>
                     <div class="search-bar">
                         <i class="fa-solid fa-search"></i>
-                        <input type="text" id="search-faculty" placeholder="Search by name or department...">
+                        <input type="text" id="search-faculty" placeholder="Search by name or department..." autocomplete="off">
                     </div>
                 </header>
 
@@ -97,16 +107,25 @@
                         <p>Enter the details to register a new faculty member.</p>
                     </div>
                 </header>
+
+                <!-- HOD restriction notice (shown only to HOD users via JS) -->
+                <div class="hod-notice hidden" id="hod-dept-notice">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>As HOD, you can only add faculty to your department: <strong id="hod-dept-label"></strong></span>
+                </div>
+
                 <div class="form-card">
-                    <form id="add-faculty-form">
+                    <form id="add-faculty-form" autocomplete="off">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="firstName">First Name *</label>
                                 <input type="text" id="firstName" required>
+                                <span class="field-error" id="err-firstName"></span>
                             </div>
                             <div class="form-group">
                                 <label for="lastName">Last Name *</label>
                                 <input type="text" id="lastName" required>
+                                <span class="field-error" id="err-lastName"></span>
                             </div>
                             <div class="form-group">
                                 <label for="empId">Employee ID (Auto)</label>
@@ -117,13 +136,15 @@
                                 <label for="department">Department *</label>
                                 <select id="department" required>
                                     <option value="" disabled selected>Select Department</option>
-                                    <option value="CSE">Computer Science & Engineering</option>
-                                    <option value="ECE">Electronics & Communication</option>
+                                    <option value="CSE">Computer Science &amp; Engineering</option>
+                                    <option value="ECE">Electronics &amp; Communication</option>
+                                    <option value="CCE">Computer &amp; Communication Engineering</option>
                                     <option value="ME">Mechanical Engineering</option>
                                     <option value="Mathematics">Mathematics</option>
                                     <option value="Physics">Physics</option>
-                                    <option value="HSS">Humanities & Social Sciences</option>
+                                    <option value="HSS">Humanities &amp; Social Sciences</option>
                                 </select>
+                                <span class="field-error" id="err-department"></span>
                             </div>
                             <div class="form-group">
                                 <label for="designation">Designation *</label>
@@ -134,28 +155,46 @@
                                     <option value="Assistant Professor">Assistant Professor</option>
                                     <option value="Lecturer">Lecturer</option>
                                 </select>
+                                <span class="field-error" id="err-designation"></span>
                             </div>
                             <div class="form-group">
                                 <label for="joiningYear">Joining Year *</label>
                                 <input type="number" id="joiningYear" min="1990" max="2030" required>
+                                <span class="field-error" id="err-joiningYear"></span>
                             </div>
                             <div class="form-group">
                                 <label for="email">Email Address *</label>
-                                <input type="email" id="email" required>
+                                <input type="email" id="email" placeholder="name@lnmiit.ac.in" required>
+                                <span class="field-error" id="err-email"></span>
                             </div>
                             <div class="form-group">
                                 <label for="phone">Phone Number</label>
-                                <input type="tel" id="phone">
+                                <input type="tel" id="phone" placeholder="10-digit mobile number">
+                                <span class="field-error" id="err-phone"></span>
                             </div>
                             <div class="form-group full-width">
                                 <label for="specialization">Specialization</label>
-                                <input type="text" id="specialization"
-                                    placeholder="e.g. Artificial Intelligence, Data Science">
+                                <select id="specialization" required>
+                                    <option value="" disabled selected>Select Specialization</option>
+                                    <option value="Artificial Intelligence">Artificial Intelligence</option>
+                                    <option value="Data Science">Data Science</option>
+                                    <option value="Cyber Security">Cyber Security</option>
+                                    <option value="Cloud Computing">Cloud Computing</option>
+                                    <option value="Software Engineering">Software Engineering</option>
+                                    <option value="Computer Networks">Computer Networks</option>
+                                    <option value="VLSI Design">VLSI Design</option>
+                                    <option value="Embedded Systems">Embedded Systems</option>
+                                    <option value="Robotics">Robotics</option>
+                                    <option value="Thermodynamics">Thermodynamics</option>
+                                    <option value="Discrete Mathematics">Discrete Mathematics</option>
+                                    <option value="Algebra">Algebra</option>
+                                </select>
+                                <span class="field-error" id="err-specialization"></span>
                             </div>
                         </div>
                         <div class="form-actions">
                             <button type="reset" class="btn-secondary">Clear</button>
-                            <button type="submit" class="btn-primary">Add Faculty</button>
+                            <button type="submit" class="btn-primary" id="submit-add-faculty">Add Faculty</button>
                         </div>
                     </form>
                 </div>
@@ -170,7 +209,7 @@
                     </div>
                 </header>
                 <div class="form-card">
-                    <form id="allocate-course-form">
+                    <form id="allocate-course-form" autocomplete="off">
                         <div class="form-grid-3">
                             <div class="form-group">
                                 <label for="allocFacultySelect">Select Faculty *</label>

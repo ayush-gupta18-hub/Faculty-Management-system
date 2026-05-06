@@ -12,9 +12,19 @@ const facultySchema = new mongoose.Schema({
     department:   { type: String, required: true },
     designation:  { type: String, required: true },
     joiningYear:  { type: Number, required: true },
-    email:        { type: String, required: true, unique: true, trim: true, lowercase: true },
+    email:        { 
+        type: String, 
+        required: true, 
+        unique: true, 
+        trim: true, 
+        lowercase: true,
+        match: [/.+@lnmiit\.ac\.in$/, 'Please enter a valid @lnmiit.ac.in email address']
+    },
     phone:        { type: String, default: '' },
-    specialization: { type: String, default: 'N/A' },
+    specialization: { 
+        type: String, 
+        default: 'N/A'
+    },
     courses:      { type: [courseSchema], default: [] },
     color:        { type: String, default: '#38bdf8' }
 }, { timestamps: true });
