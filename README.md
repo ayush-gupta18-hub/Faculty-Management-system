@@ -61,7 +61,7 @@ Faculty-Management/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/madhavbansal50/Faculty-Management.git
+git clone https://github.com/ayush-gupta18-hub/Faculty-Management-system.git
 cd Faculty-Management
 ```
 
